@@ -107,7 +107,7 @@ impl epi::App for TemplateApp {
                 ui.text_edit_singleline(entry_search);
             });
             for i in 0..entries.len() {
-                if entries[i].name[entries[i].name.len() - entries[i].name.len()..entry_search.len()].to_string() == entry_search.to_string() {
+                if entries[i].name.get(entries[i].name.len() - entries[i].name.len()..entry_search.len()) == Some(entry_search) {
                     if ui.button(entries[i].name.clone()).clicked() {
                         //launching entry
                         if entries[i].wine == false {
