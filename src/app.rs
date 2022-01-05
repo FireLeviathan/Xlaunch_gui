@@ -87,7 +87,7 @@ impl epi::App for TemplateApp {
             entries = serde_json::from_str(&data).unwrap();
 
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            // The top panel is often a good place for a menu bar:
+            // top pannel: menu bar:
             egui::menu::bar(ui, |ui| {
                 ui.menu_button("File", |ui| {
                     if ui.button("Quit").clicked() {
@@ -107,7 +107,7 @@ impl epi::App for TemplateApp {
                 ui.text_edit_singleline(entry_search);
             });
             for i in 0..entries.len() {
-                if entries[i].name.to_string() == entry_search.to_string() {
+                if entries[i].name[entries[i].name.len() - entries[i].name.len()..entry_search.len()].to_string() == entry_search.to_string() {
                     if ui.button(entries[i].name.clone()).clicked() {
                         //launching entry
                         if entries[i].wine == false {
