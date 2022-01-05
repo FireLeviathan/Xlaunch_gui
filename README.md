@@ -1,10 +1,10 @@
-#Xlaunch_gui
+Xlaunch_gui
 
 Xlaunch utilitary with a gui
 
 https://github.com/FireLeviathan/Xlaunch
 
-##what it can do
+what it can do:
 
 -can launch entries in a new xorg server
 
