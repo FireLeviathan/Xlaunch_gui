@@ -72,24 +72,6 @@ impl epi::App for TemplateApp {
         let Self { label, value, entry_name, entry_path, entry_to_delete, entry_search } = self;
 
 
-        egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            // The top panel is often a good place for a menu bar:
-            egui::menu::bar(ui, |ui| {
-                ui.menu_button("File", |ui| {
-                    if ui.button("Quit").clicked() {
-                        frame.quit();
-                    }
-                });
-            });
-        });
-
-
-
-        //central pannel
-        egui::CentralPanel::default().show(ctx, |ui| {
-
-            ui.heading("apps");
-
             //entries
             #[derive(Clone, Serialize, Deserialize, Debug)] 
             struct Entry {
@@ -104,14 +86,69 @@ impl epi::App for TemplateApp {
             let mut data = fs::read_to_string("data.json").expect("unable to read file");
             entries = serde_json::from_str(&data).unwrap();
 
+        egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
+            // The top panel is often a good place for a menu bar:
+            egui::menu::bar(ui, |ui| {
+                ui.menu_button("File", |ui| {
+                    if ui.button("Quit").clicked() {
+                        frame.quit();
+                    }
+                });
+            });
+        });
+
+        //left side pannel
+        egui::SidePanel::left("side_panel").show(ctx, |ui| {
+            ui.heading("");
+            
+            //search
+            ui.horizontal(|ui| {
+                ui.label("search: ");
+                ui.text_edit_singleline(entry_search);
+            });
+            for i in 0..entries.len() {
+                if entries[i].name.to_string() == entry_search.to_string() {
+                    if ui.button(entries[i].name.clone()).clicked() {
+                        //launching entry
+                        if entries[i].wine == false {
+                            let shell = include_str!("launch.sh");
+                            let rust_var = entries[i].path.clone();
+                            let script = format!("VARIABLE={} ; {}", rust_var, shell);
+                            std::process::Command::new("sh")
+                                .arg("-c")
+                                .arg(script)
+                                .spawn()
+                                .unwrap()
+                                .wait();
+                        }else{
+                            let shell = include_str!("launch_wine.sh");
+                            let rust_var = entries[i].path.clone();
+                            let script = format!("VARIABLE={} ; {}", rust_var, shell);
+                            std::process::Command::new("sh")
+                            .arg("-c")
+                                .arg(script)
+                                .spawn()
+                                .unwrap()
+                                .wait();  
+                        }
+                    }
+                }
+            }
+            
+        });   
+
+        //central pannel
+        egui::CentralPanel::default().show(ctx, |ui| {
+
+            ui.heading("apps");
 
             //generating one button for each entry
-            for i in 0..entries.len() {
-                if ui.button(entries[i].name.clone()).clicked() {
+            for k in 0..entries.len() {
+                if ui.button(entries[k].name.clone()).clicked() {
                     //launching entry
-                    if entries[i].wine == false {
+                    if entries[k].wine == false {
                         let shell = include_str!("launch.sh");
-                        let rust_var = entries[i].path.clone();
+                        let rust_var = entries[k].path.clone();
                         let script = format!("VARIABLE={} ; {}", rust_var, shell);
                         std::process::Command::new("sh")
                             .arg("-c")
@@ -121,7 +158,7 @@ impl epi::App for TemplateApp {
                             .wait();
                         }else{
                         let shell = include_str!("launch_wine.sh");
-                        let rust_var = entries[i].path.clone();
+                        let rust_var = entries[k].path.clone();
                         let script = format!("VARIABLE={} ; {}", rust_var, shell);
                         std::process::Command::new("sh")
                             .arg("-c")
@@ -131,47 +168,7 @@ impl epi::App for TemplateApp {
                             .wait();  
                         }
                 }
-            }
-
-            //left side pannel
-            egui::SidePanel::left("side_panel").show(ctx, |ui| {
-                ui.heading("");
-            
-                //search
-                ui.horizontal(|ui| {
-                    ui.label("search: ");
-                    ui.text_edit_singleline(entry_search);
-                });
-                for i in 0..entries.len() {
-                    if entries[i].name.to_string() == entry_search.to_string() {
-                        if ui.button(entries[i].name.clone()).clicked() {
-                            //launching entry
-                            if entries[i].wine == false {
-                                let shell = include_str!("launch.sh");
-                                let rust_var = entries[i].path.clone();
-                                let script = format!("VARIABLE={} ; {}", rust_var, shell);
-                                std::process::Command::new("sh")
-                                    .arg("-c")
-                                    .arg(script)
-                                    .spawn()
-                                    .unwrap()
-                                    .wait();
-                            }else{
-                                let shell = include_str!("launch_wine.sh");
-                                let rust_var = entries[i].path.clone();
-                                let script = format!("VARIABLE={} ; {}", rust_var, shell);
-                                std::process::Command::new("sh")
-                                    .arg("-c")
-                                    .arg(script)
-                                    .spawn()
-                                    .unwrap()
-                                    .wait();  
-                            }
-                        }
-                    }
-                }
-            
-            });    
+            } 
 
             //right side pannel
             egui::SidePanel::right("side_panel2").show(ctx, |ui| {
