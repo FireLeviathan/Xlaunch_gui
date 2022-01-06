@@ -2,5 +2,5 @@
 
 pkexec rm /tmp/.X4-lock
 pkexec X :4 -ac -terminate &
-sleep 1
+sleep 10
 DISPLAY=:4 $VARIABLE
