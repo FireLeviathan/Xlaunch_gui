@@ -11,3 +11,5 @@ what it can do:
 -can add/remove entries
 
 -include a search functionnality
+
+-include a command to kill wine process
