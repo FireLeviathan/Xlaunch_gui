@@ -220,7 +220,7 @@ impl epi::App for TemplateApp {
                 });
 
                 if ui.button("Remove").clicked() {
-                    for i in 0..entries.len() {
+                    for i in 0..entries.len()-1 {
                         if entries[i].name.to_string() == entry_to_delete.to_string(){
                             for j in i..entries.len()-1{
                                 entries[j] = entries[j+1].clone();

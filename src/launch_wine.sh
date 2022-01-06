@@ -1,7 +1,7 @@
+#script to launch VARIABLE in a new xorg server with wine
 
-
-sudo rm /tmp/.X4-lock
 export WINEPREFIX="/home/fire/.wine"
-sudo X :4 -ac -terminate &
-sleep 1
+pkexec rm /tmp/.X4-lock
+pkexec X :4 -ac -terminate &
+sleep 10
 DISPLAY=:4 wine $VARIABLE
