@@ -93,6 +93,16 @@ impl epi::App for TemplateApp {
                     if ui.button("Quit").clicked() {
                         frame.quit();
                     }
+                    if ui.button("kill wine").clicked() {
+                        let shell = include_str!("killwine.sh");
+                        let script = format!(" {}", shell);
+                        std::process::Command::new("sh")
+                            .arg("-c")
+                            .arg(script)
+                            .spawn()
+                            .unwrap()
+                            .wait();
+                    }
                 });
             });
         });
