@@ -248,18 +248,21 @@ impl epi::App for TemplateApp {
                 });
 
                 if ui.button("Add").clicked() {
-                    let mut entry_type = String::new();
-                    entry_type = entry_path[entry_path.len() - 3..entry_path.len()].to_string();
-                    if entry_type.to_string() == "exe".to_string() {
-                        println!("autodetect detected that wine is necessary to launch this software/game, adding wine: True to entry.");
-                        entries.push(Entry { name: entry_name.to_string(), path: entry_path.to_string(), wine: true });
-                    }else{
-                        println!("autodetect detected that wine is unnecessary to launch this software/game, adding wine: False to entry.");
-                        entries.push(Entry { name: entry_name.to_string(), path: entry_path.to_string(), wine: false });
+                    if entry_name.to_string() != "" && entry_path.to_string() != "" {
+                        let mut entry_type = String::new();
+                        entry_type = entry_path[entry_path.len() - 3..entry_path.len()].to_string();
+                        if entry_type.to_string() == "exe".to_string() {
+                            println!("autodetect detected that wine is necessary to launch this software/game, adding wine: True to entry.");
+                            entries.push(Entry { name: entry_name.to_string(), path: entry_path.to_string(), wine: true });
+                        }else{
+                            println!("autodetect detected that wine is unnecessary to launch this software/game, adding wine: False to entry.");
+                            entries.push(Entry { name: entry_name.to_string(), path: entry_path.to_string(), wine: false });
+                        }
+                        //writing to file
+                        let mut serialized_entries =serde_json::to_string(&entries).unwrap();
+                        fs::write("data.json", serialized_entries).expect("unable to write file");
+                
                     }
-                    //writing to file
-                    let mut serialized_entries =serde_json::to_string(&entries).unwrap();
-                    fs::write("data.json", serialized_entries).expect("unable to write file");
                 }
 
                 //button to remove an entry
