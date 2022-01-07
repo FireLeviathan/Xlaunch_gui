@@ -23,6 +23,7 @@ pub struct TemplateApp {
     entry_path: String,
     entry_to_delete: String,
     entry_search: String,
+    with_xorg: bool,
 }
 
 impl Default for TemplateApp {
@@ -35,6 +36,7 @@ impl Default for TemplateApp {
             entry_path: String::new(),
             entry_to_delete: String::new(),
             entry_search: String::new(),
+            with_xorg: false,
         }
     }
 }
@@ -69,7 +71,7 @@ impl epi::App for TemplateApp {
     /// Called each time the UI needs repainting, which may be many times per second.
     /// Put your widgets into a `SidePanel`, `TopPanel`, `CentralPanel`, `Window` or `Area`.
     fn update(&mut self, ctx: &egui::CtxRef, frame: &epi::Frame) {
-        let Self { label, value, entry_name, entry_path, entry_to_delete, entry_search } = self;
+        let Self { label, value, entry_name, entry_path, entry_to_delete, entry_search, with_xorg } = self;
 
 
             //entries
@@ -109,8 +111,9 @@ impl epi::App for TemplateApp {
 
         //left side pannel
         egui::SidePanel::left("side_panel").show(ctx, |ui| {
-            ui.heading("");
             
+            ui.heading("");
+
             //search
             ui.horizontal(|ui| {
                 ui.label("search: ");
@@ -119,7 +122,8 @@ impl epi::App for TemplateApp {
             for i in 0..entries.len() {
                 if entries[i].name.get(entries[i].name.len() - entries[i].name.len()..entry_search.len()) == Some(entry_search) {
                     if ui.button(entries[i].name.clone()).clicked() {
-                        //launching entry
+                    //launching entry
+                    if with_xorg == &mut true {
                         if entries[i].wine == false {
                             let shell = include_str!("launch.sh");
                             let rust_var = entries[i].path.clone();
@@ -135,12 +139,35 @@ impl epi::App for TemplateApp {
                             let rust_var = entries[i].path.clone();
                             let script = format!("VARIABLE={} ; {}", rust_var, shell);
                             std::process::Command::new("sh")
-                            .arg("-c")
+                                .arg("-c")
                                 .arg(script)
                                 .spawn()
                                 .unwrap()
                                 .wait();  
                         }
+                    }else{
+                        if entries[i].wine == false {
+                            let shell = include_str!("launchwithoutxorg.sh");
+                            let rust_var = entries[i].path.clone();
+                            let script = format!("VARIABLE={} ; {}", rust_var, shell);
+                            std::process::Command::new("sh")
+                                .arg("-c")
+                                .arg(script)
+                                .spawn()
+                                .unwrap()
+                                .wait();
+                        }else{
+                            let shell = include_str!("launchwinewithoutxorg.sh");
+                            let rust_var = entries[i].path.clone();
+                            let script = format!("VARIABLE={} ; {}", rust_var, shell);
+                            std::process::Command::new("sh")
+                                .arg("-c")
+                                .arg(script)
+                                .spawn()
+                                .unwrap()
+                                .wait();  
+                        }     
+                    }
                     }
                 }
             }
@@ -156,27 +183,51 @@ impl epi::App for TemplateApp {
             for k in 0..entries.len() {
                 if ui.button(entries[k].name.clone()).clicked() {
                     //launching entry
-                    if entries[k].wine == false {
-                        let shell = include_str!("launch.sh");
-                        let rust_var = entries[k].path.clone();
-                        let script = format!("VARIABLE={} ; {}", rust_var, shell);
-                        std::process::Command::new("sh")
-                            .arg("-c")
-                            .arg(script)
-                            .spawn()
-                            .unwrap()
-                            .wait();
+                    if with_xorg == &mut true {
+                        if entries[k].wine == false {
+                            let shell = include_str!("launch.sh");
+                            let rust_var = entries[k].path.clone();
+                            let script = format!("VARIABLE={} ; {}", rust_var, shell);
+                            std::process::Command::new("sh")
+                                .arg("-c")
+                                .arg(script)
+                                .spawn()
+                                .unwrap()
+                                .wait();
                         }else{
-                        let shell = include_str!("launch_wine.sh");
-                        let rust_var = entries[k].path.clone();
-                        let script = format!("VARIABLE={} ; {}", rust_var, shell);
-                        std::process::Command::new("sh")
-                            .arg("-c")
-                            .arg(script)
-                            .spawn()
-                            .unwrap()
-                            .wait();  
+                            let shell = include_str!("launch_wine.sh");
+                            let rust_var = entries[k].path.clone();
+                            let script = format!("VARIABLE={} ; {}", rust_var, shell);
+                            std::process::Command::new("sh")
+                                .arg("-c")
+                                .arg(script)
+                                .spawn()
+                                .unwrap()
+                                .wait();  
                         }
+                    }else{
+                        if entries[k].wine == false {
+                            let shell = include_str!("launchwithoutxorg.sh");
+                            let rust_var = entries[k].path.clone();
+                            let script = format!("VARIABLE={} ; {}", rust_var, shell);
+                            std::process::Command::new("sh")
+                                .arg("-c")
+                                .arg(script)
+                                .spawn()
+                                .unwrap()
+                                .wait();
+                        }else{
+                            let shell = include_str!("launchwinewithoutxorg.sh");
+                            let rust_var = entries[k].path.clone();
+                            let script = format!("VARIABLE={} ; {}", rust_var, shell);
+                            std::process::Command::new("sh")
+                                .arg("-c")
+                                .arg(script)
+                                .spawn()
+                                .unwrap()
+                                .wait();  
+                        }     
+                    }
                 }
             } 
 
@@ -232,6 +283,13 @@ impl epi::App for TemplateApp {
                     let mut serialized_entries =serde_json::to_string(&entries).unwrap();
                     fs::write("data.json", serialized_entries).expect("unable to write file");
                 } 
+
+
+
+                //launching with xorg or not
+                ui.heading("new xorg server?");
+                ui.add(with_xorg_switch_wrapper(with_xorg));
+
             });
                         
         });
@@ -246,4 +304,34 @@ impl epi::App for TemplateApp {
             });
         }
     }
+}
+
+pub fn with_xorg_switch(ui: &mut egui::Ui, on: &mut bool) -> egui::Response {
+
+    let desired_size = ui.spacing().interact_size.y * egui::vec2(2.0, 1.0);
+
+    let (rect, mut response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
+
+    if response.clicked() {
+        *on = !*on;
+        response.mark_changed(); // report back that the value changed
+    }
+    response.widget_info(|| egui::WidgetInfo::selected(egui::WidgetType::Checkbox, *on, ""));
+    if ui.is_rect_visible(rect) {
+        let how_on = ui.ctx().animate_bool(response.id, *on);
+        let visuals = ui.style().interact_selectable(&response, *on);
+        let rect = rect.expand(visuals.expansion);
+        let radius = 0.5 * rect.height();
+        ui.painter()
+            .rect(rect, radius, visuals.bg_fill, visuals.bg_stroke);
+        let circle_x = egui::lerp((rect.left() + radius)..=(rect.right() - radius), how_on);
+        let center = egui::pos2(circle_x, rect.center().y);
+        ui.painter()
+            .circle(center, 0.75 * radius, visuals.bg_fill, visuals.fg_stroke);
+    }
+    response
+}
+
+pub fn with_xorg_switch_wrapper(on: &mut bool) -> impl egui::Widget + '_ {
+    move |ui: &mut egui::Ui| with_xorg_switch(ui, on)
 }
